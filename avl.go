@@ -561,6 +561,23 @@ func (t *Tree) Delete(data Comparable) (Comparable, bool) {
 	}
 }
 
+// First opens a cirsor positioned before the first value in the tree.
+func (t *Tree) First() *Cursor {
+	return &Cursor{
+		tree:     t,
+		nextNode: t.head,
+	}
+}
+
+// Last opens a cirsor positioned after the last value in the tree.
+func (t *Tree) Last() *Cursor {
+	return &Cursor{
+		tree:     t,
+		nextNode: nil,
+		end:      true,
+	}
+}
+
 // GetCursor opens a cursor whose first value will be the value that would have
 // been returned by an equivalent Lookup() call.  The iterator is bidirectional
 // and can range past the start of the search.  It is not fail-fast - changes
@@ -582,13 +599,13 @@ func (t *Tree) GetCursor(lt LookupType, data Comparable) (*Cursor, bool) {
 // HasNext checks for the availability of a next data value from the cursor.
 func (c *Cursor) HasNext() bool {
 	return c.nextNode != nil ||
-		(c.nextNode == nil && c.end && c.tree.size > 0)
+		(c.nextNode == nil && !c.end && c.tree.size > 0)
 }
 
 // HasPrev checks for the availability of a previous data value from the cursor.
 func (c *Cursor) HasPrev() bool {
 	return (c.nextNode != nil && c.nextNode.prv != nil) ||
-		(c.nextNode == nil && !c.end && c.tree.size > 0)
+		(c.nextNode == nil && c.end && c.tree.size > 0)
 }
 
 // Next retrieves the next value from the cursor.
