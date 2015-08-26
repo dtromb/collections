@@ -2,10 +2,10 @@ package avltree
 
 import (
 	"fmt"
-	"testing"
-	"strconv"
-	"runtime"
 	"math/rand"
+	"runtime"
+	"strconv"
+	"testing"
 )
 
 func treeCounts(n *avlNode) (leftDepth int, rightDepth int, size int) {
@@ -20,14 +20,14 @@ func treeCounts(n *avlNode) (leftDepth int, rightDepth int, size int) {
 		rld, rrd, rs = treeCounts(n.r)
 	}
 	if lld > lrd {
-		ld = lld+1
+		ld = lld + 1
 	} else {
-		ld = lrd+1
+		ld = lrd + 1
 	}
 	if rld > rrd {
-		rd = rld+1
+		rd = rld + 1
 	} else {
-		rd = rrd+1
+		rd = rrd + 1
 	}
 	s = ls + rs + 1
 	return ld, rd, s
@@ -47,10 +47,10 @@ func checkStructuralIntegrity(t *Tree, n *avlNode) {
 	}
 	if n.p != nil {
 		if !(n.p.l == n && n.p.r != n) &&
-		   !(n.p.r == n && n.p.l != n) {
+			!(n.p.r == n && n.p.l != n) {
 			if n.p.r == n.p.l {
 				panic("node is double-linked from parent")
-			} 
+			}
 			panic("node is not linked by parent")
 		}
 	} else {
@@ -76,7 +76,7 @@ func checkStructuralIntegrity(t *Tree, n *avlNode) {
 	}
 	if n.nxt != nil {
 		if n.nxt.prv != n {
-			panic ("node is not linked as sucessor's predecessor")
+			panic("node is not linked as sucessor's predecessor")
 		}
 	} else {
 		if n.r != nil {
@@ -99,12 +99,12 @@ func inorderSucc(n *avlNode) *avlNode {
 			cn = cn.l
 		}
 		return cn
-	} 	
+	}
 	cn := n
 	for cn.p != nil {
 		if cn.p.l == cn {
 			return cn.p
-		} 
+		}
 		cn = cn.p
 	}
 	return nil
@@ -122,7 +122,7 @@ func inorderPred(n *avlNode) *avlNode {
 	for cn.p != nil {
 		if cn.p.r == cn {
 			return cn.p
-		} 
+		}
 		cn = cn.p
 	}
 	return nil
@@ -136,7 +136,7 @@ func checkLinks(n *avlNode) {
 	if inorderSucc(n) != n.nxt {
 		panic("incorrect successor link")
 	}
-} 
+}
 
 func checkOrder(n *avlNode) {
 	if n.l != nil {
@@ -153,7 +153,7 @@ func checkOrder(n *avlNode) {
 		if n.data.CompareTo(n.r.data) >= 0 {
 			panic("right child order violation")
 		}
-	}	
+	}
 	if n.nxt != nil {
 		if n.data.CompareTo(n.nxt.data) >= 0 {
 			panic("successor order violation")
@@ -176,7 +176,7 @@ func (ci ComparableInt) CompareTo(o Comparable) int8 {
 
 func checkBalance(n *avlNode) {
 	ld, rd, _ := treeCounts(n)
-	balance := rd-ld
+	balance := rd - ld
 	if n.balance != int8(balance) {
 		panic("incorrect balance record")
 	}
@@ -196,9 +196,9 @@ func checkNodesRecursive(t *Tree, n *avlNode) {
 	if n == nil {
 		return
 	}
-	checkNode(t,n)
-	checkNodesRecursive(t,n.l)
-	checkNodesRecursive(t,n.r)
+	checkNode(t, n)
+	checkNodesRecursive(t, n.l)
+	checkNodesRecursive(t, n.r)
 }
 
 func checkTree(t *Tree) {
@@ -206,7 +206,7 @@ func checkTree(t *Tree) {
 	if size != int(t.Size()) {
 		panic("incorrect size in tree")
 	}
-	checkNodesRecursive(t,t.root)
+	checkNodesRecursive(t, t.root)
 }
 
 func strnode(n *avlNode) string {
@@ -221,8 +221,8 @@ func dumpNode(n *avlNode) string {
 		return fmt.Sprintf("nil")
 	}
 	return fmt.Sprintf("%s: par=%s left=%s right=%s prv=%s nxt=%s bal=%d\n",
-			   			strnode(n), strnode(n.p), strnode(n.l), strnode(n.r),
-			  			strnode(n.prv), strnode(n.nxt), n.balance)
+		strnode(n), strnode(n.p), strnode(n.l), strnode(n.r),
+		strnode(n.prv), strnode(n.nxt), n.balance)
 }
 
 func dumpNodeRecursive(n *avlNode) {
@@ -245,12 +245,12 @@ func TestAvl(t *testing.T) {
 		if r := recover(); r != nil {
 			t.Error(r)
 			buf := make([]byte, 1024)
-			runtime.Stack(buf,false)
+			runtime.Stack(buf, false)
 			fmt.Println(string(buf))
 			dumpTree(tree)
 		}
 	}()
-	
+
 	// Inserts
 	fmt.Println("Instrumented test /w incremental constraint verification...")
 	var N = 10000
@@ -270,7 +270,7 @@ func TestAvl(t *testing.T) {
 	var deleted = make(map[ComparableInt]ComparableInt)
 	for i := 0; i < N*3/5; i++ {
 		//dumpTree(tree)
-		x := ComparableInt(int(rand.Int31())%N)
+		x := ComparableInt(int(rand.Int31()) % N)
 		//fmt.Printf("DELETE %d\n",x)
 		old, found := tree.Delete(x)
 		if _, has := deleted[x]; has {
@@ -289,7 +289,7 @@ func TestAvl(t *testing.T) {
 		checkTree(tree)
 	}
 	fmt.Printf("Deleted %d, Size = %d\n", dcount, tree.Size())
-	if (int(tree.Size()) != N-dcount) {
+	if int(tree.Size()) != N-dcount {
 		panic("incorrect size after deletions")
 	}
 }
@@ -300,12 +300,12 @@ func TestAvl2(t *testing.T) {
 		if r := recover(); r != nil {
 			t.Error(r)
 			buf := make([]byte, 1024)
-			runtime.Stack(buf,false)
+			runtime.Stack(buf, false)
 			fmt.Println(string(buf))
 			dumpTree(tree)
 		}
 	}()
-	
+
 	// Inserts
 	fmt.Println("Operational mode tests...")
 	var N = 5000000
@@ -321,7 +321,7 @@ func TestAvl2(t *testing.T) {
 	var dcount int
 	var deleted = make(map[ComparableInt]ComparableInt)
 	for i := 0; i < N*3/5; i++ {
-		x := ComparableInt(int(rand.Int31())%N)
+		x := ComparableInt(int(rand.Int31()) % N)
 		old, found := tree.Delete(x)
 		if _, has := deleted[x]; has {
 			if found {
@@ -336,7 +336,7 @@ func TestAvl2(t *testing.T) {
 		}
 	}
 	fmt.Printf("Deleted %d, Size = %d\n", dcount, tree.Size())
-	if (int(tree.Size()) != N-dcount) {
+	if int(tree.Size()) != N-dcount {
 		panic("incorrect size after deletions")
 	}
 }
