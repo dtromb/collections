@@ -17,7 +17,14 @@ type Tree struct {
 
 // Cursor is an iterator type that provides access to the elements of the tree
 // as a list.
-type Cursor struct {
+type Cursor interface {
+	HasNext() bool
+	HasPrev() bool
+	Next() Comparable
+	Prev() Comparable
+}
+
+type treeCursor struct {
 	tree     *Tree
 	nextNode *avlNode
 	end      bool
@@ -562,16 +569,16 @@ func (t *Tree) Delete(data Comparable) (Comparable, bool) {
 }
 
 // First opens a cirsor positioned before the first value in the tree.
-func (t *Tree) First() *Cursor {
-	return &Cursor{
+func (t *Tree) First() Cursor {
+	return &treeCursor{
 		tree:     t,
 		nextNode: t.head,
 	}
 }
 
 // Last opens a cirsor positioned after the last value in the tree.
-func (t *Tree) Last() *Cursor {
-	return &Cursor{
+func (t *Tree) Last() Cursor {
+	return &treeCursor{
 		tree:     t,
 		nextNode: nil,
 		end:      true,
@@ -582,9 +589,9 @@ func (t *Tree) Last() *Cursor {
 // been returned by an equivalent Lookup() call.  The iterator is bidirectional
 // and can range past the start of the search.  It is not fail-fast - changes
 // in the tree will change its behavior.
-func (t *Tree) GetCursor(lt LookupType, data Comparable) (*Cursor, bool) {
+func (t *Tree) GetCursor(lt LookupType, data Comparable) (Cursor, bool) {
 	n, exact := t.lookupNode(lt, data)
-	c := &Cursor{
+	c := &treeCursor{
 		tree:     t,
 		nextNode: n,
 	}
@@ -597,19 +604,19 @@ func (t *Tree) GetCursor(lt LookupType, data Comparable) (*Cursor, bool) {
 }
 
 // HasNext checks for the availability of a next data value from the cursor.
-func (c *Cursor) HasNext() bool {
+func (c *treeCursor) HasNext() bool {
 	return c.nextNode != nil ||
 		(c.nextNode == nil && !c.end && c.tree.size > 0)
 }
 
 // HasPrev checks for the availability of a previous data value from the cursor.
-func (c *Cursor) HasPrev() bool {
+func (c *treeCursor) HasPrev() bool {
 	return (c.nextNode != nil && c.nextNode.prv != nil) ||
 		(c.nextNode == nil && c.end && c.tree.size > 0)
 }
 
 // Next retrieves the next value from the cursor.
-func (c *Cursor) Next() Comparable {
+func (c *treeCursor) Next() Comparable {
 	if c.nextNode == nil {
 		if c.end {
 			return nil
@@ -631,7 +638,7 @@ func (c *Cursor) Next() Comparable {
 // what it sounds like - if you "switch directions", Prev() will return the previous
 // value returned by Next() - **not the one before that** in the order.  And vice
 // versa...)
-func (c *Cursor) Prev() Comparable {
+func (c *treeCursor) Prev() Comparable {
 	if c.nextNode == nil {
 		if c.end == true {
 			c.nextNode = c.tree.tail
