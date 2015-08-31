@@ -159,7 +159,7 @@ func (ps *pairSet) Contains(c c.Comparable) bool {
 }
 
 func (ps *pairSet) Union(s Set) Set {
-	t := &tree.Tree{}
+	t := tree.NewTree()
 	t.Insert(ps.x)
 	t.Insert(ps.y)
 	c := s.OpenCursor()
@@ -271,10 +271,10 @@ func Pair(c1, c2 c.Comparable) Set {
 }
 
 type treeSet struct {
-	tree *tree.Tree
+	tree tree.Tree
 }
 
-func TreeSet(tree *tree.Tree) MutableSet {
+func TreeSet(tree tree.Tree) MutableSet {
 	return &treeSet{tree: tree}
 }
 
@@ -314,7 +314,7 @@ func (ts *treeSet) Contains(cm c.Comparable) bool {
 }
 
 func (ts *treeSet) Union(s Set) Set {
-	nt := &tree.Tree{}
+	nt := tree.NewTree()
 	tsc := ts.OpenCursor()
 	for tsc.HasNext() {
 		nt.Insert(tsc.Next())
@@ -330,7 +330,7 @@ func (ts *treeSet) Intersection(s Set) Set {
 	if ts.Size() > s.Size() {
 		return s.Intersection(ts)
 	}
-	nt := &tree.Tree{}
+	nt := tree.NewTree()
 	c := ts.OpenCursor()
 	for c.HasNext() {
 		k := c.Next()
@@ -342,7 +342,7 @@ func (ts *treeSet) Intersection(s Set) Set {
 }
 
 func (ts *treeSet) Difference(s Set) Set {
-	nt := &tree.Tree{}
+	nt := tree.NewTree()
 	c := ts.OpenCursor()
 	for c.HasNext() {
 		k := c.Next()
@@ -374,5 +374,5 @@ func (ts *treeSet) Retain(cs ...c.Comparable) {
 }
 
 func (ts *treeSet) Clear() {
-	ts.tree = &tree.Tree{}
+	ts.tree = tree.NewTree()
 }

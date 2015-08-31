@@ -2,9 +2,9 @@ package tree
 
 import c "github.com/dtromb/collections"
 
-// Tree is an implementation of an AVL Balanced Binary Tree, with threads.
+// AvlTree is an implementation of an AVL Balanced Binary AvlTree, with threads.
 // O(1) iteration and O(ln(n)) time for other operations.
-type Tree struct {
+type AvlTree struct {
 	size uint
 	root *avlNode
 	head *avlNode
@@ -12,7 +12,7 @@ type Tree struct {
 }
 
 type treeCursor struct {
-	tree     *Tree
+	tree     *AvlTree
 	nextNode *avlNode
 	end      bool
 }
@@ -23,8 +23,13 @@ type avlNode struct {
 	l, r, p, nxt, prv *avlNode
 }
 
+func (t *AvlTree) Has(data c.Comparable) bool {
+	_, has := t.Lookup(c.LTE, data)
+	return has
+}
+
 // Lookup finds a value in the tree according to the given parameters.
-func (t *Tree) Lookup(lt c.LookupType, data c.Comparable) (c.Comparable, bool) {
+func (t *AvlTree) Lookup(lt c.LookupType, data c.Comparable) (c.Comparable, bool) {
 	n, exact := t.lookupNode(lt, data)
 	if n == nil {
 		return nil, exact
@@ -32,7 +37,7 @@ func (t *Tree) Lookup(lt c.LookupType, data c.Comparable) (c.Comparable, bool) {
 	return n.data, exact
 }
 
-func (t *Tree) lookupNode(lt c.LookupType, data c.Comparable) (*avlNode, bool) {
+func (t *AvlTree) lookupNode(lt c.LookupType, data c.Comparable) (*avlNode, bool) {
 	if t.root == nil {
 		return nil, false
 	}
@@ -63,11 +68,11 @@ func (t *Tree) lookupNode(lt c.LookupType, data c.Comparable) (*avlNode, bool) {
 }
 
 // Size returns the number of elements in the tree.
-func (t *Tree) Size() uint {
+func (t *AvlTree) Size() uint {
 	return t.size
 }
 
-func (t *Tree) rebalanceAtNode(cn *avlNode) (newParent *avlNode, heightChange bool) {
+func (t *AvlTree) rebalanceAtNode(cn *avlNode) (newParent *avlNode, heightChange bool) {
 	switch cn.balance {
 	case -2:
 		{
@@ -252,7 +257,7 @@ func (t *Tree) rebalanceAtNode(cn *avlNode) (newParent *avlNode, heightChange bo
 
 // Insert adds or replaces a value in the tree.  If there is already an equal value,
 // it is replaced and the old value returned.  Otherwise, nil is returned.
-func (t *Tree) Insert(data c.Comparable) c.Comparable {
+func (t *AvlTree) Insert(data c.Comparable) c.Comparable {
 	if t.root == nil {
 		t.root = &avlNode{
 			data: data,
@@ -355,7 +360,7 @@ func (t *Tree) Insert(data c.Comparable) c.Comparable {
 // Delete removes an element from the tree.  If the argument is found, the
 // canonical value from the tree is returned along with boolean true.  If not,
 // the pair (nil,false) is returned.
-func (t *Tree) Delete(data c.Comparable) (c.Comparable, bool) {
+func (t *AvlTree) Delete(data c.Comparable) (c.Comparable, bool) {
 	if t.root == nil {
 		return nil, false
 	}
@@ -546,7 +551,7 @@ func (t *Tree) Delete(data c.Comparable) (c.Comparable, bool) {
 }
 
 // First opens a cirsor positioned before the first value in the tree.
-func (t *Tree) First() c.Cursor {
+func (t *AvlTree) First() c.Cursor {
 	return &treeCursor{
 		tree:     t,
 		nextNode: t.head,
@@ -554,7 +559,7 @@ func (t *Tree) First() c.Cursor {
 }
 
 // Last opens a cirsor positioned after the last value in the tree.
-func (t *Tree) Last() c.Cursor {
+func (t *AvlTree) Last() c.Cursor {
 	return &treeCursor{
 		tree:     t,
 		nextNode: nil,
@@ -566,7 +571,7 @@ func (t *Tree) Last() c.Cursor {
 // been returned by an equivalent Lookup() call.  The iterator is bidirectional
 // and can range past the start of the search.  It is not fail-fast - changes
 // in the tree will change its behavior.
-func (t *Tree) GetCursor(lt c.LookupType, data c.Comparable) (c.Cursor, bool) {
+func (t *AvlTree) GetCursor(lt c.LookupType, data c.Comparable) (c.Cursor, bool) {
 	n, exact := t.lookupNode(lt, data)
 	tc := &treeCursor{
 		tree:     t,
