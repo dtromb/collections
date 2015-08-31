@@ -1,10 +1,6 @@
-package avltree
+package tree
 
-// Comparable is received by types usable in a Tree.  Returns -1 if receiver
-// is ordered less than, 1 if ordered greater than, and 0 if equal to the argument.
-type Comparable interface {
-	CompareTo(o Comparable) int8
-}
+import c "github.com/dtromb/collections"
 
 // Tree is an implementation of an AVL Balanced Binary Tree, with threads.
 // O(1) iteration and O(ln(n)) time for other operations.
@@ -15,15 +11,6 @@ type Tree struct {
 	tail *avlNode
 }
 
-// Cursor is an iterator type that provides access to the elements of the tree
-// as a list.
-type Cursor interface {
-	HasNext() bool
-	HasPrev() bool
-	Next() Comparable
-	Prev() Comparable
-}
-
 type treeCursor struct {
 	tree     *Tree
 	nextNode *avlNode
@@ -31,23 +18,13 @@ type treeCursor struct {
 }
 
 type avlNode struct {
-	data              Comparable
+	data              c.Comparable
 	balance           int8
 	l, r, p, nxt, prv *avlNode
 }
 
-// LookupType is the "direction" of the lookup to perform.
-type LookupType int
-
-const (
-	// GTE searches for the smallest value >= search argument.
-	GTE LookupType = iota
-	// LTE searches for the largest value <= search argument.
-	LTE
-)
-
 // Lookup finds a value in the tree according to the given parameters.
-func (t *Tree) Lookup(lt LookupType, data Comparable) (Comparable, bool) {
+func (t *Tree) Lookup(lt c.LookupType, data c.Comparable) (c.Comparable, bool) {
 	n, exact := t.lookupNode(lt, data)
 	if n == nil {
 		return nil, exact
@@ -55,7 +32,7 @@ func (t *Tree) Lookup(lt LookupType, data Comparable) (Comparable, bool) {
 	return n.data, exact
 }
 
-func (t *Tree) lookupNode(lt LookupType, data Comparable) (*avlNode, bool) {
+func (t *Tree) lookupNode(lt c.LookupType, data c.Comparable) (*avlNode, bool) {
 	if t.root == nil {
 		return nil, false
 	}
@@ -67,7 +44,7 @@ func (t *Tree) lookupNode(lt LookupType, data Comparable) (*avlNode, bool) {
 		}
 		if r < 0 {
 			if cn.l == nil {
-				if lt == GTE {
+				if lt == c.GTE {
 					return cn, false
 				}
 				return cn.prv, false
@@ -75,7 +52,7 @@ func (t *Tree) lookupNode(lt LookupType, data Comparable) (*avlNode, bool) {
 			cn = cn.l
 		} else {
 			if cn.r == nil {
-				if lt == LTE {
+				if lt == c.LTE {
 					return cn, false
 				}
 				return cn.nxt, false
@@ -275,7 +252,7 @@ func (t *Tree) rebalanceAtNode(cn *avlNode) (newParent *avlNode, heightChange bo
 
 // Insert adds or replaces a value in the tree.  If there is already an equal value,
 // it is replaced and the old value returned.  Otherwise, nil is returned.
-func (t *Tree) Insert(data Comparable) Comparable {
+func (t *Tree) Insert(data c.Comparable) c.Comparable {
 	if t.root == nil {
 		t.root = &avlNode{
 			data: data,
@@ -378,11 +355,11 @@ func (t *Tree) Insert(data Comparable) Comparable {
 // Delete removes an element from the tree.  If the argument is found, the
 // canonical value from the tree is returned along with boolean true.  If not,
 // the pair (nil,false) is returned.
-func (t *Tree) Delete(data Comparable) (Comparable, bool) {
+func (t *Tree) Delete(data c.Comparable) (c.Comparable, bool) {
 	if t.root == nil {
 		return nil, false
 	}
-	var returnVal Comparable
+	var returnVal c.Comparable
 	cn := t.root
 	for {
 		r := cn.data.CompareTo(data)
@@ -569,7 +546,7 @@ func (t *Tree) Delete(data Comparable) (Comparable, bool) {
 }
 
 // First opens a cirsor positioned before the first value in the tree.
-func (t *Tree) First() Cursor {
+func (t *Tree) First() c.Cursor {
 	return &treeCursor{
 		tree:     t,
 		nextNode: t.head,
@@ -577,7 +554,7 @@ func (t *Tree) First() Cursor {
 }
 
 // Last opens a cirsor positioned after the last value in the tree.
-func (t *Tree) Last() Cursor {
+func (t *Tree) Last() c.Cursor {
 	return &treeCursor{
 		tree:     t,
 		nextNode: nil,
@@ -589,18 +566,18 @@ func (t *Tree) Last() Cursor {
 // been returned by an equivalent Lookup() call.  The iterator is bidirectional
 // and can range past the start of the search.  It is not fail-fast - changes
 // in the tree will change its behavior.
-func (t *Tree) GetCursor(lt LookupType, data Comparable) (Cursor, bool) {
+func (t *Tree) GetCursor(lt c.LookupType, data c.Comparable) (c.Cursor, bool) {
 	n, exact := t.lookupNode(lt, data)
-	c := &treeCursor{
+	tc := &treeCursor{
 		tree:     t,
 		nextNode: n,
 	}
-	if c.nextNode == nil {
-		if lt == GTE {
-			c.end = true
+	if tc.nextNode == nil {
+		if lt == c.GTE {
+			tc.end = true
 		}
 	}
-	return c, exact
+	return tc, exact
 }
 
 // HasNext checks for the availability of a next data value from the cursor.
@@ -616,7 +593,7 @@ func (c *treeCursor) HasPrev() bool {
 }
 
 // Next retrieves the next value from the cursor.
-func (c *treeCursor) Next() Comparable {
+func (c *treeCursor) Next() c.Comparable {
 	if c.nextNode == nil {
 		if c.end {
 			return nil
@@ -638,7 +615,7 @@ func (c *treeCursor) Next() Comparable {
 // what it sounds like - if you "switch directions", Prev() will return the previous
 // value returned by Next() - **not the one before that** in the order.  And vice
 // versa...)
-func (c *treeCursor) Prev() Comparable {
+func (c *treeCursor) Prev() c.Comparable {
 	if c.nextNode == nil {
 		if c.end == true {
 			c.nextNode = c.tree.tail

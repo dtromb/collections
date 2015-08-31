@@ -1,7 +1,8 @@
-package avltree
+package tree
 
 import (
 	"fmt"
+	c "github.com/dtromb/collections"
 	"math/rand"
 	"runtime"
 	"strconv"
@@ -163,7 +164,7 @@ func checkOrder(n *avlNode) {
 
 type ComparableInt int
 
-func (ci ComparableInt) CompareTo(o Comparable) int8 {
+func (ci ComparableInt) CompareTo(o c.Comparable) int8 {
 	co := o.(ComparableInt)
 	if ci < co {
 		return -1
